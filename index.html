@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jogo de Nave Completo com Loja</title>
+    <style>
+        /* --- ESTILOS GLOBAIS --- */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #111;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            color: white;
+            width: 100%;
+        }
+        
+        /* O CONTAINER PRINCIPAL DO JOGO E MENU */
+        #game-container {
+            position: relative;
+            width: 95vw; 
+            max-width: 800px;
+            height: 65vh; 
+            max-height: 600px;
+            background-color: #1a1a1a;
+            border: 2px solid #555;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+        }
+
+        canvas {
+            display: block;
+            background-color: transparent;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- ESTILOS DOS BOTÕES GERAIS --- */
+        .menu-button {
+            padding: 15px 40px;
+            margin: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            background-color: #2ecc71; /* Verde */
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            box-shadow: 0 4px #27ae60;
+        }
+
+        .menu-button:hover {
+            background-color: #27ae60;
+        }
+        
+        /* --- TELAS DE MENU E LOJA --- */
+        .game-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none; /* Escondido por padrão */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.9);
+            text-align: center;
+        }
+        
+        /* --- LOJA --- */
+        #shop-menu h2 {
+            margin-bottom: 5px;
+        }
+
+        #coin-display-menu {
+            font-size: 24px;
+            color: #f1c40f; /* Amarelo da moeda */
+            margin-bottom: 20px;
+        }
+
+        #shop-screen {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .shop-item {
+            background-color: #2c3e50;
+            border: 2px solid #34495e;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px #1c2834;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            min-height: 200px; 
+            justify-content: space-between;
+        }
+        
+        .selected {
+             border: 3px solid #f1c40f; 
+        }
+
+        .shop-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #f1c40f;
+            margin-top: 10px;
+        }
+
+        .shop-btn {
+            padding: 8px 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .btn-buy {
+            background-color: #3498db;
+            color: white;
+            box-shadow: 0 3px #2980b9;
+        }
+
+        .btn-select {
+            background-color: #f1c40f;
+            color: #333;
+            box-shadow: 0 3px #e67e22;
+        }
+        
+        .btn-selected {
+            background-color: #9b59b6; 
+            color: white;
+            box-shadow: 0 3px #8e44ad;
+        }
+
+        .btn-disabled {
+            background-color: #95a5a6;
+            color: #ecf0f1;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* --- CONTROLES VIRTUAIS --- */
+        #controls {
+            width: 100%;
+            height: 25vh; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            user-select: none; 
+        }
+        
+        .control-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        #d-pad {
+            display: grid;
+            grid-template-areas: ". up ." "left . right" ". down .";
+            width: 150px;
+            height: 150px;
+            gap: 5px;
+            margin-left: 20px;
+        }
+        
+        #shoot-btn {
+            background-color: #e74c3c; 
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px #c0392b;
+            cursor: pointer;
+            margin-right: 20px;
+            touch-action: manipulation;
+        }
+        
+        .d-btn {
+            background-color: #34495e; 
+            border-radius: 5px;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px #2c3e50;
+            cursor: pointer;
+            font-size: 10px;
+            touch-action: manipulation;
+        }
+
+        #up-btn { grid-area: up; }
+        #down-btn { grid-area: down; }
+        #left-btn { grid-area: left; }
+        #right-btn { grid-area: right; }
+    </style>
+    <audio id="shoot-sound" preload="auto">
+        <source src="piu-piu.mp3" type="audio/mpeg">
+        <source src="piu-piu.wav" type="audio/wav">
+    </audio>
+    <audio id="
